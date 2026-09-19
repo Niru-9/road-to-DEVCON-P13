@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://swarm-preservation.local/schemas/swarm-preservation-archive/v1",
+  "title": "swarm-preservation-archive",
+  "description": "Content-addressed archive manifest pointed to by a Swarm feed. The feed identity is the only identifier a reader needs; every data item is a Swarm reference.",
+  "type": "object",
+  "required": ["format", "version", "title", "updatedAt", "items"],
+  "additionalProperties": false,
+  "properties": {
+    "format": {
+      "const": "swarm-preservation-archive"
+    },
+    "version": {
+      "const": 1
+    },
+    "title": { "type": "string", "minLength": 1 },
+    "updatedAt": { "type": "string", "format": "date-time" },
+    "feed": {
+      "type": "object",
+      "required": ["owner", "topic"],
+      "properties": {
+        "owner": { "type": "string", "pattern": "^0x[0-9a-fA-F]{64}$" },
+        "topic": { "type": "string", "pattern": "^0x[0-9a-fA-F]{64}$" }
+      }
+    },
+    "items": {
+      "type": "array",
+      "minItems": 0,
+      "items": {
+        "type": "object",
+        "required": ["name", "reference"],
+        "additionalProperties": false,
+        "properties": {
+          "name": { "type": "string", "minLength": 1 },
+          "reference": { "type": "string", "pattern": "^0x[0-9a-fA-F]{64}$" }
+        }
+      }
+    }
+  }
+}
