@@ -154,7 +154,13 @@ OUTPUT_DIR=./recovered
 
 - `tsconfig.json` targeting Node 22 (ESM), strict.
 - runner: Node 22 `--experimental-strip-types` or `tsx`; build with `tsc`.
+  - **[OLD]** Decision deferred to Phase 2. **[NEW]** ESM + `tsc` build; tests via
+    **Vitest 4.1.11** (pinned). **[REASON]** Vitest gives deterministic TS test
+    execution on Node 22 without a type-strip flag or tsx; ESM ready for
+    bee-js v13. **[SOURCE]** `package.json`, `vitest.config.ts`, CI runs green.
 - test runner: `node:test` (zero-dependency) or Vitest — decide after Bee availability.
+  - **[OLD]** open choice. **[NEW]** Vitest (see above). **[REASON]** established above
+    and surfaced in Phase 1; not dependent on Bee availability. **[SOURCE]** `vitest.config.ts`.
 
 ## 15. 12-hour schedule
 

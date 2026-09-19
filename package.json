@@ -1,0 +1,24 @@
+{
+  "name": "problem-1-archive",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Archive That Outlives Its Host — publish manuscript collections on Swarm with one stable feed identity; recover from identifiers alone.",
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "@ethersphere/bee-js": "13.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "22.20.4",
+    "typescript": "5.9.3",
+    "vitest": "4.1.11"
+  }
+}

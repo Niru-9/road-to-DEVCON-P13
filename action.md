@@ -65,3 +65,59 @@ Phase 2 foundation (TS, Bee client, config, env, tests), then Phase 3 core
 ## Next Action
 Write the Phase-1+ implementation prompt in workspace `prompt.md` (after review);
 then Phase 2 foundation per `plan.md` §14.
+
+---
+
+# Phase 1 FOUNDATION (2026-09-19)
+
+## Objective
+Strict foundation: TS scaffold, config/errors/DI boundaries, evaluator-guardrail
+architecture tests, feature-neutral modules. No publish/recovery logic yet; no live
+network writes.
+
+## Completed
+- Toolchain (pinned): TypeScript 5.9.3, bee-js **13.1.0**, @types/node 22.20.4,
+  **Vitest 4.1.11**, ESM, NodeNext, strict. ESM over CJS chosen for v13 readiness.
+- Modules: `src/config.ts`, `src/types.ts`, `src/errors.ts`,
+  `src/swarm/bee.ts`, `src/swarm/feed.ts`, `src/swarm/storage.ts`,
+  `src/archive/manifest.ts`, `src/archive/publisher.ts`, `src/archive/recovery.ts`,
+  `src/cli/main.ts`. ApiSurface interface declares the runtime target;
+  feature code is a thin boundary, not core logic.
+- Tests (34 total, all PASS): `manifest.test.ts`, `feed.test.ts`,
+  `storage.test.ts`, `recovery.test.ts`, `architecture.test.ts`:
+  - feed: writer/reader/index + FIRST_RUN detection on empty feed
+  - storage: batch status + duration/TTL surface
+  - manifest: stable manifest mapping
+  - recovery: `loadRecoveryConfig` **never reads PRIVATE_KEY**
+  - architecture: no SwarmIdClient, no secrets in tracked src, no dist in git,
+    exact toolkit pins asserted via `package.json`
+- Installed deps; `npm test` 34/34 green; `npm run typecheck` clean;
+  `npm run build` clean; `npm audit` 0 vulnerabilities.
+- Runtime-verified installed bee-js 13.1.0 namespaced APIs (data upload/download,
+  feed makeWriter/makeReader/createManifest, stamp get/getAll/topUp,
+  storage extend/extendDuration/extendSize, NULL_STAMP/NULL_TOPIC).
+
+## Files Created (this phase)
+package.json, package-lock.json, tsconfig.json, tsconfig.build.json,
+vitest.config.ts, .env, src/** and tests/** (above).
+`src/config.ts` creates `.env` when absent; `.gitignore` excludes it.
+
+## Build
+test 34 passed, typecheck OK, build OK (tsc -p tsconfig.build.json).
+`git ls-files` excludes node_modules/dist/.env.
+
+## Security Audit
+Recovery config intentionally lacks PRIVATE_KEY (loaded from env only).
+No secrets in tracked source; 64-hex scan clean; audit 0 vulnerabilities.
+
+## Evaluator Checks Satisfied
+P1-T1..P1-T8 mapped in workspace traceability: foundation tests now enforce
+P1-T2 first-run empty-feed, P1-T3 no-fake-index (network-derived reference),
+P1-T5 identity env-only, P1-T7 recovery hides the private key, P1-T8 valuation.
+CORE (publish/recover/see-later) deferred to next phase.
+
+## Remaining
+Phase 2 core: real publish, recovery CLI, network effects via a live Bee node.
+
+## Problems
+- No live Bee on localhost:1633 at phase close (by design; verified in probe).

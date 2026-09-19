@@ -1,6 +1,7 @@
 # Problem 1 — Archive That Outlives Its Host
 
-> Phase 0 (research + plan). Implementation **NOT STARTED**.
+> **FOUNDATION PHASE COMPLETE** (toolchain, boundaries, guardrail tests).
+> CORE (publish / recover) **NOT STARTED**.
 
 ## 1. Problem
 A manuscript archive is published once; the publishing application disappears; a
@@ -46,8 +47,12 @@ recovery from only the feed identity.
 manifest), Bee endpoint, output directory.
 
 ## 10. Test results
-No code yet. Test plan in `plan.md` §13; per-check template in
-`docs/evaluator-audit.md`.
+FOUNDATION PHASE (green): `npm test` 34/34 passed; `npm run typecheck` clean;
+`npm run build` clean; `npm audit` 0 vulnerabilities. Suite: manifest, feed
+(empty-feed first-run detection), storage (batch status/duration), recovery
+(`loadRecoveryConfig` never reads `PRIVATE_KEY`), architecture (no SwarmIdClient,
+no secrets in tracked src, no dist in git, exact pinned toolchain).
+CORE (publish / recover) tests **not yet written** - deferred to next phase.
 
 ## 11. Evaluator traceability
 `plan.md` §5 and workspace `docs/traceability-matrix.md` (P1-T1…P1-T8).
