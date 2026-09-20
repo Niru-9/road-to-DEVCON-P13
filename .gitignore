@@ -8,3 +8,22 @@ build/
 .env.*.local
 !.env.example
 coverage/
+.DS_Store
+node_modules/
+dist/
+build/
+*.log
+.env
+.env.local
+.env.*.local
+!.env.example
+coverage/
+
+# Local planning / development artifacts
+plan.md
+research.md
+action.md
+
+# Temporary local probes / stress scripts
+p1-probe.mjs
+p1-stress.mjs
