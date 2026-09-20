@@ -17,6 +17,9 @@ export class InvalidManifestError extends ArchiveError {}
 /** A feed has never been updated; reading it yields no state (P1-7). */
 export class FeedEmptyError extends ArchiveError {}
 
+/** A just-written feed update was not observed by the network within the bounded confirmation window. */
+export class FeedWriteUnconfirmedError extends ArchiveError {}
+
 /** A postage batch is not usable for new uploads (P1-6). */
 export class BatchUnusableError extends ArchiveError {}
 

@@ -1,0 +1,12 @@
+{
+  "format": "swarm-preservation-archive",
+  "version": 1,
+  "identity": {
+    "owner": "0xbc86656811f5d6e90aace15b1cd9267658290a8d",
+    "topic": "p1-live-round-trip-archive-reference"
+  },
+  "status": "published",
+  "publishedAt": "2026-09-20T14:31:35.218Z",
+  "feedIndex": "4",
+  "reference": "35031edaf7090250acd24d18cbe47b3ecc1473d6c57a6d95b8b44c517f5a2137"
+}

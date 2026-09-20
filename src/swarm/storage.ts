@@ -1,57 +1,61 @@
-// Postage batch lifetime handling (P1-6). Status is computed from
-// node-reported fields only; thresholds are configurable constants.
+// Deterministic storage-helpers (P1-6): batch lifetime / status and manifest
+// byte round-trips. No Bee I/O here — purely computable from values the CLI
+// already fetched. `formatRemainingLifetime` drives the CLI's human "remaining"
+// column; `batchStatus` classifies PAID / EXPIRING / EXPIRED so the CLI can
+// warn before an update lands.
 
-import type { BatchStatus } from '../types.js';
-
-export interface BatchLifetimeReadings {
-  /** Node-reported duration (estimated time until expiry). Null when unknown. */
-  durationMs: number | null;
-  /** Whether the node reports the batch as usable for new uploads. */
-  usable: boolean;
-}
-
-export interface BatchLifetimeThresholds {
-  /** Within this window the batch is reported as EXPIRING rather than PAID. */
+export interface BatchThresholds {
+  /** Below this remaining lifetime (ms) a batch is EXPIRING. */
   expiringWhenUnderMs: number;
-  /** When duration is at or below this the batch is considered EXPIRED. */
+  /** At or below this remaining lifetime (ms) a batch is EXPIRED. */
   expiredWhenAtMostMs: number;
 }
 
-export const defaultThresholds: BatchLifetimeThresholds = {
-  expiringWhenUnderMs: 7 * 24 * 60 * 60 * 1000,
-  expiredWhenAtMostMs: 0,
+export const defaultThresholds: BatchThresholds = {
+  expiringWhenUnderMs: 3 * 24 * 60 * 60 * 1000,
+  expiredWhenAtMostMs: 6 * 60 * 60 * 1000,
 };
 
-export function batchStatus(readings: BatchLifetimeReadings, thresholds: BatchLifetimeThresholds = defaultThresholds): BatchStatus {
-  const { durationMs, usable } = readings;
-  if (!usable && (durationMs === null || durationMs <= thresholds.expiredWhenAtMostMs)) {
-    return { status: 'EXPIRED', durationMs };
-  }
-  if (!usable) {
-    return { status: 'EXPIRED', durationMs };
-  }
-  if (durationMs !== null && durationMs <= thresholds.expiredWhenAtMostMs) {
-    return { status: 'EXPIRED', durationMs };
-  }
-  if (durationMs !== null && durationMs < thresholds.expiringWhenUnderMs) {
-    return { status: 'EXPIRING', durationMs };
-  }
-  return { status: 'PAID', durationMs };
+export type BatchStatusKind = 'PAID' | 'EXPIRING' | 'EXPIRED';
+
+export interface BatchStatusInput {
+  /** Remaining lifetime in ms as reported by Bee. */
+  durationMs: number;
+  /** Whether the batch is usable for uploads right now. */
+  usable: boolean;
 }
 
-export function formatRemainingLifetime(durationMs: number | null): string {
-  if (durationMs === null) {
-    return 'unknown';
+export function batchStatus(
+  input: BatchStatusInput,
+  thresholds: BatchThresholds = defaultThresholds,
+): { status: BatchStatusKind; durationMs: number } {
+  if (!input.usable || input.durationMs <= thresholds.expiredWhenAtMostMs) {
+    return { status: 'EXPIRED', durationMs: input.durationMs };
   }
-  const seconds = Math.max(0, Math.floor(durationMs / 1000));
-  const days = Math.floor(seconds / 86400);
-  const hours = Math.floor((seconds % 86400) / 3600);
-  const minutes = Math.floor((seconds % 3600) / 60);
-  if (days > 0) {
-    return `${days}d ${hours}h`;
+  if (input.durationMs < thresholds.expiringWhenUnderMs) {
+    return { status: 'EXPIRING', durationMs: input.durationMs };
   }
-  if (hours > 0) {
-    return `${hours}h ${minutes}m`;
+  return { status: 'PAID', durationMs: input.durationMs };
+}
+
+/** Human lifetime string, e.g. "6d 14h", "2h 3m", "45m". `null` → "unknown". */
+export function formatRemainingLifetime(remainingMs: number | null): string {
+  if (remainingMs === null) return 'unknown';
+  if (remainingMs < 1000) return '0m';
+  const units: Array<{ label: string; sizeMs: number }> = [
+    { label: 'd', sizeMs: 24 * 60 * 60 * 1000 },
+    { label: 'h', sizeMs: 60 * 60 * 1000 },
+    { label: 'm', sizeMs: 60 * 1000 },
+  ];
+  const parts: string[] = [];
+  let rest = remainingMs;
+  for (const { label, sizeMs } of units) {
+    const n = Math.floor(rest / sizeMs);
+    if (n > 0) {
+      parts.push(`${n}${label}`);
+      rest -= n * sizeMs;
+      if (parts.length === 2) break;
+    }
   }
-  return `${minutes}m`;
+  return parts.length > 0 ? parts.join(' ') : '0m';
 }
